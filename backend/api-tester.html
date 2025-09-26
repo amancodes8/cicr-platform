@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CICR API Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    .card {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      background: #007bff;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    pre {
+      background: #222;
+      color: #0f0;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>CICR API Tester</h1>
+  <div class="container">
+
+    <!-- Auth -->
+    <div class="card">
+      <h2>Auth</h2>
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="Enter email">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter password">
+      <button onclick="login()">Login</button>
+      <button onclick="createInvite()">Create Invite (Admin)</button>
+    </div>
+
+    <!-- Users -->
+    <div class="card">
+      <h2>Users</h2>
+      <button onclick="getUsers()">Get All Users</button>
+    </div>
+
+    <!-- Teams -->
+    <div class="card">
+      <h2>Teams</h2>
+      <label>Team Name</label>
+      <input type="text" id="teamName" placeholder="Team Name">
+      <button onclick="createTeam()">Create Team</button>
+      <button onclick="getTeams()">Get Teams</button>
+    </div>
+
+    <!-- Projects -->
+    <div class="card">
+      <h2>Projects</h2>
+      <label>Project Title</label>
+      <input type="text" id="projectTitle" placeholder="Project Title">
+      <button onclick="createProject()">Create Project</button>
+      <button onclick="getProjects()">Get Projects</button>
+    </div>
+
+    <!-- Meetings -->
+    <div class="card">
+      <h2>Meetings</h2>
+      <label>Meeting Title</label>
+      <input type="text" id="meetingTitle" placeholder="Meeting Title">
+      <select id="meetingType">
+        <option value="offline">Offline</option>
+        <option value="online">Online</option>
+      </select>
+      <button onclick="createMeeting()">Create Meeting</button>
+      <button onclick="getMeetings()">Get Meetings</button>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="card">
+      <h2>Chatbot</h2>
+      <textarea id="chatInput" rows="3" placeholder="Enter text to summarize..."></textarea>
+      <button onclick="summarize()">Summarize</button>
+    </div>
+
+    <!-- Output -->
+    <div class="card">
+      <h2>Response</h2>
+      <pre id="output">Click a button above to test an API...</pre>
+    </div>
+
+  </div>
+
+  <script>
+    const API_URL = "http://localhost:4000/api";
+    let token = "";
+
+    function showOutput(data) {
+      document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function login() {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      token = data.token || "";
+      showOutput(data);
+    }
+
+    async function createInvite() {
+      const res = await fetch(`${API_URL}/auth/invite`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: "member" })
+      });
+      showOutput(await res.json());
+    }
+
+    async function getUsers() {
+      const res = await fetch(`${API_URL}/users`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      showOutput(await res.json());
+    }
+
+    async function createTeam() {
+      const name = document.getElementById("teamName").value;
+      const res = await fetch(`${API_URL}/teams`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ name })
+      });
+      showOutput(await res.json());
+    }
+
+    async function getTeams() {
+      const res = await fetch(`${API_URL}/teams`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      showOutput(await res.json());
+    }
+
+    async function createProject() {
+      const title = document.getElementById("projectTitle").value;
+      const res = await fetch(`${API_URL}/projects`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ title })
+      });
+      showOutput(await res.json());
+    }
+
+    async function getProjects() {
+      const res = await fetch(`${API_URL}/projects`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      showOutput(await res.json());
+    }
+
+    async function createMeeting() {
+      const title = document.getElementById("meetingTitle").value;
+      const type = document.getElementById("meetingType").value;
+      const res = await fetch(`${API_URL}/meetings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ title, meeting_type: type })
+      });
+      showOutput(await res.json());
+    }
+
+    async function getMeetings() {
+      const res = await fetch(`${API_URL}/meetings`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      showOutput(await res.json());
+    }
+
+    async function summarize() {
+      const content = document.getElementById("chatInput").value;
+      const res = await fetch(`${API_URL}/chatbot/summarize`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ type: "page", content })
+      });
+      showOutput(await res.json());
+    }
+  </script>
+</body>
+</html>

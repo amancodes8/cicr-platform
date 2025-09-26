@@ -1,0 +1,7 @@
+const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, JWT_SECRET } = process.env;
+
+module.exports = {
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY,
+  JWT_SECRET,
+};
